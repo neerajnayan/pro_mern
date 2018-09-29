@@ -9,31 +9,28 @@ class IssueFilter extends React.Component {
   }
 }
 
-class IssueRow extends React.Component {
-  render() {
-    const issue = this.props.issue;
-    return (
-      <tr>
-        <td>{issue.id}</td>
-        <td>{issue.status}</td>
-        <td>{issue.owner}</td>
-        <td>{issue.created.toDateString()}</td>
-        <td>{issue.effort}</td>
-        <td>{issue.completionDate ? issue.completionDate.toDateString() : ''}</td>
-        <td>{issue.title}</td>
-      </tr>
-    );
-  }
-}
+// Compare the declaration of this component vs
+// IssueTable. Both components are defined as 
+// functions but with little difference.
+class IssueRow = (props) => (
+    <tr>
+        <td>{props.issue.id}</td>
+        <td>{props.issue.status}</td>
+        <td>{props.issue.owner}</td>
+        <td>{props.issue.created.toDateString()}</td>
+        <td>{props.issue.effort}</td>
+        <td>{props.issue.completionDate ? issue.completionDate.toDateString() : ''}</td>
+        <td>{props.issue.title}</td>
+    </tr>
+);
 
 IssueRow.propTypes = {
     issue_id: React.PropTypes.number.isRequired,
     issue_title: React.PropTypes.string
 };
 
-class IssueTable extends React.Component {
-  render() {
-    const issueRows = this.props.issues.map(issue => 
+function IssueTable (props) {
+    const issueRows = props.issues.map(issue => 
         <IssueRow key={issue.id} issue={issue} />);
     return (
       <table className='bordered-table'>
@@ -53,15 +50,39 @@ class IssueTable extends React.Component {
             </tbody>
       </table>
     );
-  }
 }
 
 class IssueAdd extends React.Component {
-  render() {
-    return (
-      <div>This is a placeholder for an issue Add Entry form.</div>
-    );
-  }
+    constructor() {
+        super();
+        this.handleSubmit = this.handleSubmit.bind(this);
+    }
+    
+    handleSubmit(e) {
+        e.preventDefault();
+        var form = document.forms.issueAdd;
+        this.props.createIssue({
+            owner: form.owner.value,
+            title: form.title.value,
+            status: 'New',
+            created: new Date()
+        });
+        // Clear the form for the next input
+        form.owner.value = '';
+        form.title.value = '';
+    }
+    
+    render() {
+        return (
+            <div>
+                <form name="issueAdd" onSubmit={this.handleSubmit}>
+                    <input type="text" name="owner" placeholder="Owner"/>
+                    <input type="text" name="title" placeholder="Title"/>
+                    <button>Add</button>
+                </form>
+            </div>
+        );
+    }
 }
 
 const issues = [
@@ -80,10 +101,19 @@ const issues = [
 class IssueList extends React.Component {
     constructor() {
         super()
-        this.state = {
-            issues: issues
-        };
-        setTimeout(this.createTestIssue.bind(this), 2000);
+        this.state = { issues: [] };
+        
+        this.createIssue = this.createIssue.bind(this);
+    }
+    
+    componentDidMount() {
+        this.loadData();
+    }
+    
+    loadData() {
+        setTimeout(() => {
+            this.setState({issues: issues});
+        }, 500);
     }
     
     createIssue(newIssue) {
@@ -93,13 +123,6 @@ class IssueList extends React.Component {
         this.setState({ issues: newIssues });
     }
   
-    createTestIssue() {
-        this.createIssue({
-            status: 'New', owner: 'Pieta', created: new Date(),
-            title: 'Completion date should be optional',
-        });
-    }
-    
     render() {
         return (
             <div>
@@ -108,7 +131,7 @@ class IssueList extends React.Component {
             <hr />
             <IssueTable issues={this.state.issues} />
             <hr />
-            <IssueAdd />
+            <IssueAdd createIssue={this.createIssue} />
         </div>
         );
     }
