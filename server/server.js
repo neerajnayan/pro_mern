@@ -1,7 +1,12 @@
-const express = require('express');
-const bodyParser = require('body-parser');
-const MongoClient = require('mongodb').MongoClient;
-const Issue = require('./issue.js');
+import express from 'express';
+const path = require('path');
+import bodyParser from 'body-parser';
+import 'babel-polyfill';
+import { MongoClient } from 'mongodb';
+import SourceMapSupport from 'source-map-support';
+SourceMapSupport.install();
+
+import Issue from './issue.js';
 
 const app = express();
 // express.static generates a middleware function which responds to
@@ -46,6 +51,13 @@ app.post('/api/issues', (req, res) => {
         res.status(500).json({message: `Internal server error: $(error)` });
     });
 });
+
+// Handles any requests that don't match the ones above
+app.get('*', (req,res) => {
+    console.log('Path: ', path.join(__dirname+'/../static/index.html'));
+    res.sendFile(path.join(__dirname+'/../static/'));
+});
+console.log('sddd');
 
 let db;
 MongoClient.connect('mongodb://localhost:27017').then(connection => {

@@ -1,5 +1,6 @@
 import React from 'react';
 import 'whatwg-fetch';
+import { Link } from 'react-router-dom';
 
 import IssueAdd from './IssueAdd.jsx';
 import IssueFilter from './IssueFilter.jsx';
@@ -9,7 +10,7 @@ import IssueFilter from './IssueFilter.jsx';
 // functions but with little difference.
 const IssueRow = (props) => (
     <tr key={props.key}>
-        <td>{props.issue._id}</td>
+        <td><Link to={`/issues/${props.issue._id}`}>{props.issue._id.substr(-4)}</Link></td>
         <td>{props.issue.status}</td>
         <td>{props.issue.owner}</td>
         <td>{props.issue.created.toDateString()}</td>
